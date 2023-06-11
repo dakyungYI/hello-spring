@@ -29,19 +29,20 @@ public class MemberService {
      */
     public Long join(Member member) {
 
-        long start = System.currentTimeMillis();
-        try {
             validateDuplicateMember(member); //중복 회원 검증
             memberRepository.save(member);
             return member.getId();
-        } finally {
-            long finish = System.currentTimeMillis();
-            long timeMs = finish - start;
-            System.out.println("join " + timeMs + "ms");
-        }
+
     }
 
-        //같은 이름이 잇는 중복 회원x
+    private void validateDuplicateMember(Member member) {
+        memberRepository.findByName(member.getName())
+                .ifPresent(m -> {
+                    throw new IllegalStateException("이미 존재하는 회원입니다.");
+                });
+    }
+
+    //같은 이름이 잇는 중복 회원x
 //        Optional<Member> result = memberRepository.findByName(member.getName());
 //        reslit.ifPresent(m -> {  //ifPresent : result가 null이 아니라 값이 있으면 메서드 바디의 로직이 동작을 하게 됨(Optional 이라서 가능). 과거에는 if문으로 작성했음.
 //            throw new IllegalStateException("이미 존재하는 회원입니다.");
@@ -56,28 +57,13 @@ public class MemberService {
 //        return member.getId();
 //    }
 
-    private void ValidateDuplicateMember(Member member) {
-        memberRepository.findByName(member.getName())
-                .ifPresent(m -> {
-                    throw new IllegalStateException("이미 존재하는 회원입니다.");
-                });
-    }
 
     /**
      * 전체 회원 조회
      */
     public List<Member> findMembers() {
 
-        long start = System.currentTimeMillis();
-        try {
-            return memberRepository.findAll();
-        } finally {
-            long finish = System.currentTimeMillis();
-            long timeMs = finish - start;
-            System.out.println("findMembers " + timeMs + "ms");
-        }
-
-//        return memberRepository.findAll();  //findAll의 반환 타입은 List<Member>이기 때문에 단순히 반환해주면 됨
+        return memberRepository.findAll();  //findAll의 반환 타입은 List<Member>이기 때문에 단순히 반환해주면 됨
     }
 
     public Optional<Member> findOne(Long memberId) {
